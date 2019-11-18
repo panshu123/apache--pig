@@ -1,0 +1,48 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Times New Roman;}{\f1\fnil\fcharset0 Arial;}{\f2\fnil\fcharset0 Calibri;}{\f3\fnil\fcharset2 Symbol;}}
+{\colortbl ;\red51\green51\blue51;\red255\green255\blue255;\red51\green122\blue183;\red0\green0\blue255;\red155\green155\blue155;}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sb150\sa225\sl240\slmult1\cf1\lang9\b\f0\fs36 Problem Statement\par
+\pard\sb100\sa100\sl480\slmult1\highlight2\b0\fs24 Telecom companies record their users\rquote  activity data, i.e. calls, SMS and internet usage for billing and monitoring purposes. This data is commonly called Call Detail Record (CDR) data, though apart from calls, it also contains data of text messages, internet usage etc.\par
+\pard\sa200\sl276\slmult1 Since a typical telecom company has millions of users, they generate massive quantities of data. \~\par
+\par
+In this assignment, you will analyses the \lquote Milano Grid\rquote  telecom data which contains the telecommunication activity recorded over the city of Milano in Italy. The data is collected by the Telecom Italia cellular network over the city of Milano.\par
+\par
+\pard\sb100\sa100\sl480\slmult1 The city of Milano is divided into various grids, or squares, as shown below, each denoted in this dataset by a unique square_id.\par
+\pard\sb100\sa100\sl60\slmult0\~Please\~\b note\b0\~that:\par
+All he square ids belong to the city of Milano. The country code corresponding to Milano is 39 (Italy).\~\par
+\pard\sb100\sa100\sl480\slmult1 Country code 0 means that the telco operator doesn't know the country of origin/destination or that the user asked to have this info hidden for privacy reasons. For the purpose of the assignment, you will assume that 0 is just another country code.\~\par
+The schema of the dataset is described below:\par
+\pard{\pntext\f3\'B7\tab}{\*\pn\pnlvlblt\pnf3\pnindent360{\pntxtb\'B7}}\fi-360\li720\sb100\sl480\slmult1\tx720\b Square id\b0 : the id of the square that is part of the\~\cf3\ul{\field{\*\fldinst{HYPERLINK "https://dandelion.eu/datagem/milano-grid/description/"}}{\fldrslt{Milano GRID}}}\cf1\ulnone\f0\fs24 ; TYPE: numeric\par
+\b{\pntext\f3\'B7\tab}Time interval\b0 : the beginning of the time interval expressed as the number of milliseconds elapsed from the Unix Epoch on January 1st, 1970 at UTC. The end of the time interval can be obtained by adding 600000 milliseconds (10 minutes) to this value. TYPE: numeric\par
+\b{\pntext\f3\'B7\tab}Country code\b0 : the phone country code of a nation. Depending on the measured activity this value assumes different meanings that are explained later. TYPE: numeric\par
+\b{\pntext\f3\'B7\tab}SMS-in activity\b0 : the activity in terms of received SMS inside the Square id, during the time interval and sent from the nation identified by the Country code. TYPE: numeric\par
+\b{\pntext\f3\'B7\tab}SMS-out activity\b0 : the activity in terms of sent SMS inside the Square id, during the Time interval and received by the nation identified by the Country code. TYPE: numeric\par
+\b{\pntext\f3\'B7\tab}Call-in activity\b0 : the activity in terms of received calls inside the Square id, during the Time interval and issued from the nation identified by the Country code. TYPE: numeric\par
+\b{\pntext\f3\'B7\tab}Call-out activity\b0 : the activity in terms of issued calls inside the Square id, during the Time interval and received by the nation identified by the Country code. TYPE: numeric\par
+\b{\pntext\f3\'B7\tab}Internet traffic activity\b0 : the activity in terms of performed internet traffic inside the Square id, during the Time interval and by the nation of the users performing the connection identified by the Country code . TYPE: numeric\par
+\pard\sb100\sa100\sl480\slmult1\cf5\b\f1\fs39 Important notes\par
+\cf1\b0\f0\fs24 Files are in .txt format. If no activity was recorded for a field specified in the schema above, then the corresponding value is missing from the file. For example, if for a given combination of the Square id 's', the Time interval 'i' and the Country code 'c' no SMS was received\~(so, SMSin is empty), the corresponding record looks as follows:\par
+\pard\sb100\sa100\sl480\slmult1\qc s \\t i \\t c \\t \\t SMSout \\t Callin \\t Callout \\t Internettraffic\par
+\pard\sb100\sa100\sl480\slmult1 where \\t corresponds to the tab character, SMSout is the value corresponding to the SMS-out activity, Callin is the value corresponding to the Call-in activity, Callout is the value corresponding to the Call-out activity and internettraffic is the value corresponding to the Internet traffic activity.\par
+Please note that since this .txt file doesn\rquote t have any column names as the first row, you don\rquote t have to do - tblproperties ("skip.header.line.count"="1"). Otherwise, the data stored in the first row will be skipped and you will get wrong outputs to all the questions listed below.\par
+\pard\sb100\sl480\slmult1 Please note that the answer to every question should be only\~\b ONE\b0\~numeric value. Whenever you are confused between displaying a country-wise result or squareid-wise result or an aggregated value, please show an aggregated value, combining all the squareids or the countries.\~\par
+\b Task 1: Understand the data in hand\b0\par
+\pard{\pntext\f3\'B7\tab}{\*\pn\pnlvlblt\pnf3\pnindent360{\pntxtb\'B7}}\fi-360\li720\sb100\sa100\sl480\slmult1\tx720 The dataset is of size ~6MB, which should not be deleted. Hence import the entire data in an external table.\par
+{\pntext\f3\'B7\tab}The data has a lot of empty cells. Import it such that the empty cells are treated as NULL in Pig.\par
+\pard\sb100\sl480\slmult1\b Task\~2:\~Writing Hive Queries - I\b0\par
+\pard\sa200\sl276\slmult1 You are working as an analyst responsible for analyzing telecom data of three countries (country_code = 39, 43, 33). First create a table from the external table created in task 1, to store the data corresponding only to these three countries. Do the following analysis on these three countries.\par
+\par
+\pard{\pntext\f3\'B7\tab}{\*\pn\pnlvlblt\pnf3\pnindent360{\pntxtb\'B7}}\fi-360\li720\sb100\sa100\sl480\slmult1\tx720 How many grids (square_ids) are there in total in the given three countries? Display the number of unique grids in the three countries.\par
+{\pntext\f3\'B7\tab}Which country has the minimum total internet activity? Display the country code of this country.\par
+{\pntext\f3\'B7\tab}Which country among the given three has the second highest total activity? Note that total activity is defined as the sum of sms_in, sms_out, call_in, call_out, internet_traffic. Display the country code of this country. Do not compress the table.\par
+{\pntext\f3\'B7\tab}Which squareID has the maximum total SMS activity in these three countries? Note that total SMS activity is the sum of incoming and outgoing SMSes.\cf0\highlight0\f2\fs22\par
+\cf1\highlight2\f0\fs24{\pntext\f3\'B7\tab}  What is the total activity for the three countries? Note that total activity is defined as      the sum of sms_in, sms_out, call_in, call_out, internet_traffic.\cf0\highlight0\f2\fs22\par
+\pard\li360\sb100\sa100\sl480\slmult1\tx720\par
+\pard\sb100\sl480\slmult1\cf1\highlight2\b\f0\fs24 Task 3: Writing Hive Queries - II\b0\par
+\pard\li360\sb100\sa100\sl480\slmult1\tx720\~Now, say you want to analyze a specific country with country code=39. Also, you are analyzing the activity of three specific grids with square_ids 101, 102 and 103 in this country.\par
+\par
+\par
+\pard{\pntext\f3\'B7\tab}{\*\pn\pnlvlblt\pnf3\pnindent360{\pntxtb\'B7}}\fi-360\li720\sb100\sa100\sl480\slmult1\tx720 What is the total call activity from the three square_ids to country_code 39?\par
+{\pntext\f3\'B7\tab}What is the total SMS activity from the three square_ids to country_code 39? \par
+\pard{\pntext\f3\'B7\tab}{\*\pn\pnlvlblt\pnf3\pnindent360{\pntxtb\'B7}}\fi-360\li1080\sb100\sa100\sl480\slmult1\tx720 What is the total activity, i.e. sum of CallIn, CallOut, SMSIn, SMSOut, internet traffic of the three square_ids? \cf0\highlight0\f2\fs22\par
+}
+ 

@@ -1,0 +1,437 @@
+call = load '/inputfiles/CDR.txt' using PigStorage('\t') as (square_id:int,time_interval:chararray,country_code:int,SMS_in:double,SMS_out:double,CALL_in:double,call_out:double,internet_traffic:double);
+
+dump call;
+filterd = FILTER call BY country_code == 39;
+dump filterd;
+store filterd into '/pigproject/39country_code' using PigStorage(',');
+
+filterd = FILTER call BY country_code == 43;
+dump filterd;
+store filterd into '/pigproject/43country_code' using PigStorage(',');
+
+filterd = FILTER call BY country_code == 33;
+dump filterd;
+store filterd into '/pigproject/33country_code' using PigStorage(',');
+
+
+
+
+
+/*how many square_id(grids) in the dataset*/
+
+call = load '/inputfiles/CDR.txt' using PigStorage('\t');
+
+dump call;
+check = foreach call generate $0;
+dump check;
+grouped = GROUP check  ALL;
+dump grouped;
+result = foreach grouped generate group, COUNT(check);
+
+dump result;
+
+store result into '/pigproject/total_square_id' using PigStorage(','); 
+
+
+
+
+
+/*Display the number of unique square_ids(grid)*/
+
+call = load '/inputfiles/CDR.txt' using PigStorage('\t');
+dump call;
+check = foreach call generate $0;
+dump check;
+check1 = DISTINCT check;
+dump check1;
+grouped = GROUP check1 ALL;
+dump grouped;
+result = foreach grouped generate group ,COUNT(check1);
+dump result;
+store result into '/pigproject/total_unique_square_id' using PigStorage(',');
+
+
+
+
+
+/*which country has a minimum internet activity show that country code*/
+
+call = load '/inputfiles/CDR.txt' using PigStorage('\t');
+
+
+dump call;
+check = foreach call generate $2,$7;
+
+dump check;
+
+store check into '/pigproject/country_code_and_internet_traffic' using PigStorage(',');
+
+call = load '/pigproject/country_code_and_internet_traffic' using PigStorage(',') as (country_code:int,internet_traffic:double);
+
+
+dump call;
+grouped = GROUP call BY country_code;
+
+dump grouped;
+
+result = foreach grouped generate group, SUM(call.internet_traffic);
+
+dump result;
+
+store result into '/pigproject/sum_of_internet_traffic_by_its_country_code' 
+using PigStorage(',');
+
+call = load '/pigproject/sum_of_internet_traffic_by_its_country_code' using PigStorage(',') as (country_code:int, internet_traffic:double);
+
+dump call;
+
+check = foreach call generate $1;
+
+dump check;
+
+grouped = GROUP check ALL;
+
+dump grouped;
+result = foreach grouped generate group, MIN(check.$0);
+
+dump result;
+
+store result into '/pigproject/minimum_sum_of_internet_traffic' using 
+PigStorage(',');
+
+call = load '/pigproject/sum_of_internet_traffic_by_its_country_code' using 
+PigStorage(',');
+
+dump call;
+
+result = FILTER call BY $1 == 0.0028254163096933333;
+
+dump result;
+
+store result into '/pigproject/country_code_has_minimum_internet_activity' using 
+PigStorage(',');
+
+
+
+/*Which country among the given three has the second highest total activity? Note that total activity is defined as the 
+sum of sms_in, sms_out, call_in, call_out, internet_traffic. */
+
+call = load '/pigproject/33country_code' using PigStorage(',') as (square_id:int, time_interval:long, country_code:int, 
+SMS_in:double,SMS_out:double,CALL_in:double,CALL_out:double,internet_traffic:double); 
+
+dump call;     
+
+fetch = foreach call generate country_code,SMS_in,SMS_out,CALL_in,CALL_out,internet_traffic; 
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+result = foreach grouped generate group ,SUM(fetch.$1),SUM(fetch.$2),SUM(fetch.$3),SUM(fetch.$4),SUM(fetch.$5);
+
+dump result;
+
+result1 = foreach result generate $0,$1+$2+$3+$4+$5;
+
+dump result1;
+
+  
+
+
+
+
+
+call = load '/pigproject/39country_code' using PigStorage(',') as (square_id:int, time_interval:long, country_code:int,
+SMS_in:double,SMS_out:double,CALL_in:double,CALL_out:double,internet_traffic:double);
+
+dump call;
+
+fetch = foreach call generate country_code,SMS_in,SMS_out,CALL_in,CALL_out,internet_traffic;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+final = foreach grouped generate group ,SUM(fetch.$1),SUM(fetch.$2),SUM(fetch.$3),SUM(fetch.$4),SUM(fetch.$5);
+
+dump final;
+
+
+final1 = foreach final generate $0,$1+$2+$3+$4+$5;
+
+dump final1;
+
+
+
+
+
+
+call = load '/pigproject/43country_code' using PigStorage(',') as (square_id:int, time_interval:long, country_code:int,
+SMS_in:double,SMS_out:double,CALL_in:double,CALL_out:double,internet_traffic:double);
+
+dump call;
+
+fetch = foreach call generate country_code,SMS_in,SMS_out,CALL_in,CALL_out,internet_traffic;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+deep = foreach grouped generate group ,SUM(fetch.$1),SUM(fetch.$2),SUM(fetch.$3),SUM(fetch.$4),SUM(fetch.$5);
+
+dump deep;
+
+deep1 = foreach deep  generate $0,$1+$2+$3+$4+$5;
+
+dump deep1;
+
+deepanshu = UNION result1,final1,deep1;
+
+result = ORDER deepanshu BY $1 DESC;
+
+dump result;
+
+store result into '/pigproject/country_that_has_second_highest_is_on_second_poision' using PigStorage(',');
+
+
+
+
+
+/*Which squareID has the maximum total SMS activity in these three countries? Note that total SMS activity is the sum of incoming and 
+outgoing SMSes.*/
+
+
+count = load '/pigproject/33country_code' using PigStorage(',') as 
+(square_id:int,time_interval:chararray,country_code:int,SMS_in:double,SMS_out:double,CALL_in:double,CALL_out:double,internet_traffic:double);
+
+countr = load '/pigproject/39country_code' using PigStorage(',') as
+(square_id:int,time_interval:chararray,country_code:int,SMS_in:double,SMS_out:double,CALL_in:double,CALL_out:double,internet_traffic:double);
+
+country = load '/pigproject/43country_code' using PigStorage(',') as
+(square_id:int,time_interval:chararray,country_code:int,SMS_in:double,SMS_out:double,CALL_in:double,CALL_out:double,internet_traffic:double);
+
+final = UNION count,countr,country;
+
+dump final;
+
+fetch = foreach final generate $0,$3,$4;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+sum = foreach grouped generate group ,SUM(fetch.$1), SUM(fetch.$2);
+
+dump sum;
+
+result = foreach sum generate $0,$1+$2;
+
+dump result;
+
+grouped = GROUP result ALL;
+
+dump grouped;
+
+maximum = foreach grouped generate group ,MAX(result.$1);
+
+dump maximum;
+
+final_res = FILTER result BY $1 == 2063.5513898392414;
+
+dump final_res;
+
+final_result = foreach final_res generate $0;
+
+dump final_result;
+
+store final_result into '/pigproject/squareid_has_total_maximum_SMSactivity_in_3_countries' using PigStorage(',');
+
+
+
+
+
+
+
+/*What is the total activity for the three countries? Note that total activity is defined as the sum of sms_in, sms_out, 
+call_in, call_out, internet_traffic.*/
+
+country33 = load '/pigproject/33country_code' using PigStorage(',');
+
+dump country33;
+
+fetch = foreach country33 generate $2,$3,$4,$5,$6,$7;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+sum = foreach grouped generate group ,SUM(fetch.$1),SUM(fetch.$2),SUM(fetch.$3),SUM(fetch.$4),SUM(fetch.$5);
+
+dump sum;
+
+total_country33 = foreach sum generate $0,$1+$2+$3+$4+$5;
+
+dump total_country33;
+
+
+
+country39 = load '/pigproject/39country_code' using PigStorage(',');
+
+dump country39;
+
+fetch = foreach country39 generate $2,$3,$4,$5,$6,$7;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+sum = foreach grouped generate group ,SUM(fetch.$1),SUM(fetch.$2),SUM(fetch.$3),SUM(fetch.$4),SUM(fetch.$5);
+
+dump sum;
+
+total_country39 = foreach sum generate $0,$1+$2+$3+$4+$5;
+
+dump total_country39;
+
+
+
+country43 = load '/pigproject/43country_code' using PigStorage(',');
+
+dump country43;
+
+fetch = foreach country43 generate $2,$3,$4,$5,$6,$7;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+sum = foreach grouped generate group ,SUM(fetch.$1),SUM(fetch.$2),SUM(fetch.$3),SUM(fetch.$4),SUM(fetch.$5);
+
+dump sum;
+
+total_country43 = foreach sum generate $0,$1+$2+$3+$4+$5;
+
+dump total_country43;
+
+
+fetch_all = UNION total_country33,total_country39,total_country43;
+
+dump fetch_all;
+
+fetch1 = foreach generate fetch_all $1;
+
+dump fetch1;
+
+grouped = GROUP fetch1 ALL;
+
+dump grouped;
+
+result = foreach grouped generate group ,SUM(fetch1.$0);
+
+dump result;
+
+store result into '/pigproject/total_activity_for_three_countries' using PigStorage(',');
+
+
+
+
+
+/*What is the total call activity from the three square_ids to 
+country_code 39?*/
+
+call = load '/pigproject/39country_code' using PigStorage(',');
+
+dump call;
+
+final = FILTER call BY ($0==101) or ($0==102) or ($0==103);
+
+dump final;
+
+fetch = foreach final generate $2,$5,$6;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+sum = foreach grouped generate group 
+,SUM(fetch.$1),SUM(fetch.$2);
+
+dump sum;
+
+result = foreach sum generate $1+$2+$3+$4+$5;
+
+dump result;
+
+store result into 
+'/pigproject/total_call_activity_from_three_square_id_of_39country_code' 
+using PigStorage(',');
+
+
+
+
+/*What is the total SMS activity from the three square_ids to 
+country_code 39?*/
+
+dump final;
+
+fetch = foreach final generate $2,$3,$4;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+sum = foreach grouped generate group,SUM(fetch.$1),SUM(fetch.$2);
+
+dump sum;
+
+result = foreach sum generate $1+$2;
+
+dump result;
+
+store result into 
+'/pigproject/total_SMSactivity_of_three_squareid_country_code39' using 
+PigStorage(',');
+
+
+/*What is the total activity, i.e. sum of CallIn, CallOut, SMSIn, SMSOut, internet traffic of the three square_ids? */
+
+
+dump final;
+
+fetch = foreach final generate $2,$3,$4,$5,$6,$7;
+
+dump fetch;
+
+grouped = GROUP fetch BY $0;
+
+dump grouped;
+
+sum = foreach grouped generate group ,SUM(fetch.$1),SUM(fetch.$2),SUM(fetch.$3),SUM(fetch.$4),SUM(fetch.$5);
+
+dump sum;
+
+result = foreach sum generate $1+$2+$3+$4+$5;
+
+dump result;
+
+store result into '/pigproject/total_activity_of_three_square_id_country_code39' using PigStorage(',');
+
+
